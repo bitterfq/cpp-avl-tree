@@ -112,6 +112,7 @@ private:
     std::shared_ptr<AVLnode> left_;
     std::shared_ptr<AVLnode> right_;
     int8_t balance_factor;
+    int height;
 
     friend AVL;
 }; // class AVLnode
@@ -126,8 +127,10 @@ public:
     std::string JSON() const;
     size_t size() const;
     bool empty() const;
+    long int DeleteMin();
 
 private:
+    long int DeleteMin(shared_ptr<AVLnode> currentNode);
     shared_ptr<AVLnode> node_search(long int key) const ;
     void retrace_insertion(shared_ptr<AVLnode> node);
     void retrace_deletion(shared_ptr<AVLnode> subtree_root, int8_t balance_factor);
