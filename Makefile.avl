@@ -1,0 +1,21 @@
+CC=g++
+DEV=-Wall -g -std=c++14
+OPT=-O3 -std=c++14
+
+.PHONY: all
+all: AVL
+
+AVL:	AVL.cpp avl_interface.cpp AVL.h json.hpp
+	${CC} ${OPT} AVL.cpp avl_interface.cpp AVL.h -o AVL.o
+
+ #Build
+.PHONY: clean
+clean:
+	rm -f *.o
+	rm -f *.exe
+	rm -rf *dSYM
+
+.PHONY: update
+update:
+	make clean
+	make all

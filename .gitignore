@@ -1,0 +1,8 @@
+#Compiled source#
+*.exe
+*.o
+*.swp
+
+#cmake file
+.idea/
+/cmake-build-debug/*
