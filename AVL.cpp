@@ -88,6 +88,7 @@ void AVL::Delete(long int key){
                 retrace_deletion(target->parent_.lock(), -RIGHT_HEAVY);
         }
     }
+        size_--;
 }
 
 shared_ptr<AVLnode> AVL::node_search(long int key) const {
