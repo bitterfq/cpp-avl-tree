@@ -383,9 +383,10 @@ long int AVL::DeleteMin(shared_ptr<AVLnode> currentNode) {
 
 }
  int AVL::height(shared_ptr<AVLnode> n) {
-  AVLnode *temp = n.get();
-  if (temp == nullptr)
-    return 0;
-  return temp->height;
+  if (n == nullptr) {
+    return -1;
+  }
+
+   return 1 + std::max(height(n->left_), height(n->right_));
 }
 
