@@ -313,13 +313,48 @@ AVL::AVL() {
   size_ = 0;
 }
 
-long int AVL::DeleteMin() {
+void AVL::DeleteMin() {
   DeleteMin(root_);
 }
 
-long int AVL::DeleteMin(shared_ptr<AVLnode> currentNode) {
-  if ((root_->left_ == NULL) || (root_->right_ == NULL)) {
+//Geeks for geeks deleteion method specified
 
+//https://www.geeksforgeeks.org/avl-tree-set-2-deletion/
+long int AVL::DeleteMin(shared_ptr<AVLnode> currentNode) {
+  if ((root_->left_  )|| (root_->right_)) {
+      shared_ptr<AVLnode> temp = root_->left_ ? root_->left_: root_->right_;
+
+      if (temp == nullptr) {
+        temp = root_;
+        root_ = nullptr;
+      }
+      else
+        root_ = temp ;
+        temp.reset();
+  } // else two children -- in-order succesion
+  else {
+    shared_ptr<AVLnode> successor = currentNode->right_;
+    shared_ptr<AVLnode> successor_parent ;
+    while (successor->left_)
+      successor = successor->left_;
+    successor_parent = successor->parent_.lock();
+
+    if (successor->right_)
+    {
+      if (successor->is_left_child())
+        AVLnode::set_left_child(successor_parent, successor->right_);
+      else
+        AVLnode::set_right_child(successor_parent, successor->right_);
+    }
+    else
+    {
+      if(successor->is_left_child())
+        successor_parent->left_ = nullptr;
+      else
+        successor_parent->right_ = nullptr;
+    }
   }
+  size_ -- ;
+
 }
 

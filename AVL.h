@@ -127,7 +127,7 @@ public:
     std::string JSON() const;
     size_t size() const;
     bool empty() const;
-    long int DeleteMin();
+    void DeleteMin();
 
 private:
     long int DeleteMin(shared_ptr<AVLnode> currentNode);
