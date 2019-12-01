@@ -12,23 +12,24 @@ void AVL::Insert(long int key) {
   if (!insertnode) // if empty new node, root
   {
     root_ = make_shared<AVLnode>(key);
-    root_->height = 1 + std::max(height(root_->left_), height(root_->right_)) ;
-  }
-  else if (insertnode->key_ == key)
+    size_++;
+    root_->height = std::max(height(root_->left_), height(root_->right_) + 1);
+  } else if (insertnode->key_ == key)
     return;
   else if (insertnode->key_ > key) // else new node is left child
   {
     insertnode->left_ = make_shared<AVLnode>(key, insertnode);
+    size_++;
     retrace_insertion(insertnode->left_);
-    insertnode->height = 1 + std::max(height(insertnode->left_), height(insertnode->right_));
+    insertnode->height = std::max(height(insertnode->left_), height(insertnode->right_) + 1);
 
   } else {
     insertnode->right_ = make_shared<AVLnode>(key, insertnode);
+    size_++;
     retrace_insertion(insertnode->right_);
-    insertnode->height = 1 + std::max(height(insertnode->left_), height(insertnode->right_));
+    insertnode->height = std::max(height(insertnode->left_), height(insertnode->right_) + 1);
 
   }
-  size_++;
 }
 
 optional AVL::Find(long int key) const {
@@ -241,9 +242,8 @@ shared_ptr<AVLnode> AVL::left_rotate(shared_ptr<AVLnode> old_root) {
     new_subtreeroot->balance_factor = BALANCED;
     old_root->balance_factor = BALANCED;
   }
-  old_root->height = std::max(height(old_root->left_), height(old_root->right_)) + 1;
-  new_subtreeroot->height = std::max(height(new_subtreeroot->left_), height(new_subtreeroot->right_)) + 1 ;
-
+  old_root->height = std::max(height(old_root->left_), height(old_root->right_) + 1);
+  new_subtreeroot->height = std::max(height(new_subtreeroot->left_), height(new_subtreeroot->right_) + 1);
   return new_subtreeroot;
 }
 
@@ -270,8 +270,8 @@ shared_ptr<AVLnode> AVL::right_rotate(shared_ptr<AVLnode> old_root) {
     new_subtree_root->balance_factor = BALANCED;
     old_root->balance_factor = BALANCED;
   }
-  old_root->height = std::max(height(old_root->left_), height(old_root->right_)) + 1;
-  new_subtree_root->height = std::max(height(new_subtree_root->left_), height(new_subtree_root->right_)) + 1 ;
+  old_root->height = std::max(height(old_root->left_), height(old_root->right_) + 1);
+  new_subtree_root->height = std::max(height(new_subtree_root->left_), height(new_subtree_root->right_) + 1);
 
   return new_subtree_root;
 
@@ -378,15 +378,14 @@ long int AVL::DeleteMin(shared_ptr<AVLnode> currentNode) {
     }
 
   }
-  root_->height = 1 + std::max(height(root_->left_), height(root_->right_)) ;
   size_--;
-
+  root_->height = std::ceil(std::log(1 + size_));
 }
- int AVL::height(shared_ptr<AVLnode> n) {
+int AVL::height(shared_ptr<AVLnode> n) {
   if (n == nullptr) {
-    return -1;
+    return 0;
   }
 
-   return 1 + std::max(height(n->left_), height(n->right_));
+  return n->height;
 }
 

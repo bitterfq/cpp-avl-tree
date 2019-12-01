@@ -3,10 +3,13 @@ DEV=-Wall -g -std=c++14
 OPT=-O3 -std=c++14
 
 .PHONY: all
-all: AVL
+all: AVL AVL_COMMANDS
 
 AVL:	AVL.cpp avl_interface.cpp AVL.h json.hpp
 	${CC} ${OPT} AVL.cpp avl_interface.cpp AVL.h -o AVL.o
+
+AVL_COMMANDS:	AVL.cpp AVLcommands.cxx json.hpp AVL.h
+	${CC} ${OPT} AVL.cpp AVLcommands.cxx AVL.h json.hpp -o AVL_commands.exe
 
  #Build
 .PHONY: clean
@@ -19,3 +22,4 @@ clean:
 update:
 	make clean
 	make all
+

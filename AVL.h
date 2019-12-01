@@ -23,7 +23,7 @@ struct optional {
   // Get the value. Will still return reference to default constructed value if _has_value is false, so it's up to
   // the user to check if the structure contains a valid value before using it.
   long int &value() { return _value; }
-  const int &value() const { return _value; }
+//  const int &value() const { return _value; }
 
  private:
   long int _value;
@@ -42,7 +42,8 @@ class AVLnode {
       key_(key),
       parent_(parent),
       left_(nullptr),
-      right_(nullptr) {}
+      right_(nullptr),
+      height(1) {}
 
   bool is_left_child() const {
     shared_ptr<AVLnode> parent_sp = parent_.lock();
