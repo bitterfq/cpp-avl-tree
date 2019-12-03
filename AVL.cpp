@@ -21,14 +21,13 @@ void AVL::Insert(long int key) {
     insertnode->left_ = make_shared<AVLnode>(key, insertnode);
     size_++;
     retrace_insertion(insertnode->left_);
-    insertnode->height = std::max(height(insertnode->left_), height(insertnode->right_) + 1);
+    insertnode->left_->height = std::max(height(insertnode->left_->left_), height(insertnode->left_->right_) + 1);
 
   } else {
     insertnode->right_ = make_shared<AVLnode>(key, insertnode);
     size_++;
     retrace_insertion(insertnode->right_);
-    insertnode->height = std::max(height(insertnode->left_), height(insertnode->right_) + 1);
-
+    insertnode->right_->height = std::max(height(insertnode->left_), height(insertnode->right_) + 1);
   }
 }
 
@@ -132,8 +131,10 @@ void AVL::retrace_insertion(shared_ptr<AVLnode> node) {
         parent->balance_factor += LEFT_HEAVY;
         if (parent->balance_factor == BALANCED) {
           return;
-        } else
+        } else {
+          current->height = std::max(height(current->left_), height(current->right_) + 1);
           continue;
+        }
       }
     } else {
       if (parent->balance_factor == RIGHT_HEAVY) {
@@ -148,8 +149,10 @@ void AVL::retrace_insertion(shared_ptr<AVLnode> node) {
         parent->balance_factor += RIGHT_HEAVY;
         if (parent->balance_factor == BALANCED) {
           return;
-        } else
+        } else {
+          current->height = std::ceil(log(1 + current->height));
           continue;
+        }
       }
     }
   }

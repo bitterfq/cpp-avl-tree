@@ -29,8 +29,15 @@ int main(int argc, char **argv) {
   AVL tree;
   for (auto itr = obj.begin(); i <= opr - 1; ++itr) {
     for (auto autoitr = obj[itr.key()].begin(); autoitr != obj[itr.key()].end(); autoitr++) {
-      auto keyitr = *autoitr->begin();
-      int key = keyitr;
+
+      /*auto keyitr = (*autoitr).begin();
+      int key = *keyitr;
+      cout << key << endl;
+      ++keyitr;
+      auto operation  = (*autoitr).end();
+      string opr = *operation;
+      cout << opr << endl;*/
+      i++;
     }
   }
 }
