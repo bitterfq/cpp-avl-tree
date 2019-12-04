@@ -9,18 +9,23 @@
 void AVL::Insert(long int key) {
   shared_ptr<AVLnode> insertnode = node_search(key);
 
-  if (!insertnode) // if empty new node, root
+  if (!insertnode) { // if empty new node, root
     root_ = make_shared<AVLnode>(key);
+    root_->height = std::max(height(root_->left_), height(root_->right_)) + 1;
+  }
   else if (insertnode->key_ == key)
     return;
   else if (insertnode->key_ > key) // else new node is left child
   {
     insertnode->left_ = make_shared<AVLnode>(key, insertnode);
     retrace_insertion(insertnode->left_);
+    update(insertnode->left_);
   } else {
     insertnode->right_ = make_shared<AVLnode>(key, insertnode);
     retrace_insertion(insertnode->right_);
+    update(insertnode->right_);
   }
+
   size_++;
 }
 
@@ -89,21 +94,26 @@ shared_ptr<AVLnode> AVL::node_search(long int key) const {
   if (!root_)
     return nullptr;
   shared_ptr<AVLnode> current = root_;
+  int height = 1;
   for (;;) {
     if (key < current->key_)
-      if (current->left_)
+      if (current->left_) {
         current = current->left_;
-      else
+        height++;
+      } else
         return current;
 
     else if (key > current->key_)
-      if (current->right_)
+      if (current->right_) {
         current = current->right_;
-      else
+        height++;
+      } else
         return current;
 
-    else
+    else {
+      current->height = height;
       return current;
+    }
   }
 }
 
@@ -356,5 +366,16 @@ long int AVL::DeleteMin(shared_ptr<AVLnode> currentNode) {
   }
   size_ -- ;
 
+}
+void AVL::update(shared_ptr<AVLnode> node) {
+  shared_ptr<AVLnode> temp= node_search(node->key_);
+}
+int AVL::height(shared_ptr<AVLnode> n) {
+  if (n == nullptr)
+    return 0;
+  else
+    n->height = std::max(height(n->left_), height(n->right_)) + 1;
+
+  return n->height;
 }
 
