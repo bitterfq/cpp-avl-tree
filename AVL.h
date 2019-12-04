@@ -10,128 +10,162 @@ using std::shared_ptr;
 using std::make_shared;
 using std::weak_ptr;
 
-struct optional {
-  // Construct without value
-  optional() : _has_value(false) {}
-
-  // Construct with value
-  optional(int &value) : _value(value), _has_value(true) {}
-
-  // Return true if the struct has a value.
-  bool has_value() const { return _has_value; }
-
-  // Get the value. Will still return reference to default constructed value if _has_value is false, so it's up to
-  // the user to check if the structure contains a valid value before using it.
-  long int &value() { return _value; }
-//  const int &value() const { return _value; }
-
- private:
-  long int _value;
-  bool _has_value;
-};
-
-class AVLnode {
- public:
-  AVLnode(int key) : key_(key),
-                     parent_(std::weak_ptr<AVLnode>()),
-                     left_(nullptr),
-                     right_(nullptr),
-                     height(1) {}
-
-  AVLnode(int key, std::weak_ptr<AVLnode> parent) :
-      key_(key),
-      parent_(parent),
-      left_(nullptr),
-      right_(nullptr),
-      height(1) {}
-
-  bool is_left_child() const {
-    shared_ptr<AVLnode> parent_sp = parent_.lock();
-    if (parent_sp) {
-      if (parent_sp->left_) {
-        return key_ == parent_sp->left_->key_;
-      }
-    }
-    return false;
-  }
-  bool is_right_child() const {
-    shared_ptr<AVLnode> parent_sp = parent_.lock();
-    if (parent_sp) {
-      if (parent_sp->right_) {
-        return key_ == parent_sp->right_->key_;
-      }
-    }
-    return false;
-  }
-
-  shared_ptr<AVLnode> sibiling() const {
-    if (is_left_child())
-      return parent_.lock()->left_;
-    else
-      return parent_.lock()->right_;
-  }
-
-  void correct_balance() {
-    if (left_ && right_) {
-      if (abs(left_->balance_factor) == abs(right_->balance_factor))
-        balance_factor = 0;
-      else if (left_->balance_factor)
-        balance_factor = LEFT_HEAVY;
-      else
-        balance_factor = RIGHT_HEAVY;
-    } else if (left_)
-      balance_factor = LEFT_HEAVY;
-    else
-      balance_factor = RIGHT_HEAVY;
-  }
-
-  static void set_left_child(shared_ptr<AVLnode> parent_node, shared_ptr<AVLnode> child) {
-    parent_node->left_ = child;
-    if (child) { child->parent_ = parent_node; }
-
-  }
-
-  static void set_right_child(shared_ptr<AVLnode> parent_node, shared_ptr<AVLnode> child) {
-    parent_node->right_ = child;
-    if (child) { child->parent_ = parent_node; }
-  }
-
- private:
-  long int key_;
-  std::weak_ptr<AVLnode> parent_;
-  std::shared_ptr<AVLnode> left_;
-  std::shared_ptr<AVLnode> right_;
-  int8_t balance_factor;
-  int height;
-
-  friend AVL;
-}; // class AVLnode
-
 class AVL {
  public:
-  AVL();
+  struct node {
+    int key;
+    shared_ptr<node> left;
+    shared_ptr<node> right;
+    weak_ptr<node> parent;
+    int balance;
+    int height;
+    node(int k) {
+      height = 1;
+      key = k;
+      left = nullptr;
+      right = nullptr;
+    }
 
-  void Insert(long int key);
-  void Delete(long int key);
-  optional Find(long int key) const;
+    node (int k, weak_ptr<node> parent):
+      key(k),
+      left(nullptr),
+      right(nullptr),
+      parent(parent) {}
+
+    bool is_left_child () const {
+      shared_ptr<node> parent_sp = parent.lock();
+      if (parent_sp)
+      {
+        if (parent_sp->left)
+        {
+          return key == parent_sp->left->key;
+        }
+      }
+      return false ;
+    }
+    bool is_right_child () const {
+      shared_ptr<node> parent_sp = parent.lock();
+      if (parent_sp)
+      {
+        if (parent_sp->right)
+        {
+          return key == parent_sp->right->key;
+        }
+      }
+      return false;
+    }
+  };
+
   std::string JSON() const;
   size_t size() const;
   bool empty() const;
-  void DeleteMin();
-
- private:
-
-  long int DeleteMin(shared_ptr<AVLnode> currentNode);
-  shared_ptr<AVLnode> node_search(long int key) const;
-  void retrace_insertion(shared_ptr<AVLnode> node);
-  void retrace_deletion(shared_ptr<AVLnode> subtree_root, int8_t balance_factor);
-
-  shared_ptr<AVLnode> left_rotate(shared_ptr<AVLnode> old_root);
-  shared_ptr<AVLnode> right_rotate(shared_ptr<AVLnode> old_root);
-  shared_ptr<AVLnode> left_right(shared_ptr<AVLnode> old_root);
-  shared_ptr<AVLnode> right_left(shared_ptr<AVLnode> old_root);
-  std::shared_ptr<AVLnode> root_;
   size_t size_;
+  AVL();
 
-  int height(shared_ptr<AVLnode> n);
-}; // class AVL
+   int height(shared_ptr<node> head) {
+    if(head == nullptr) return 0;
+    return head->height;
+  }
+
+  void Insert(int x) {
+    root_ = insertUtil(root_, x);
+  }
+  void inorder() {
+    inorderUtil(root_);
+  }
+ private:
+  shared_ptr<node> root_;
+
+
+
+  shared_ptr<node> rightRotation (shared_ptr<node> head) ;
+  shared_ptr<node> leftRotation (shared_ptr<node> head) ;
+
+  void retrace_insertion(shared_ptr<node> node_) {
+    shared_ptr<node> current;
+    shared_ptr<node> parent;
+    for (current = node_; current->parent.lock() != nullptr; current = parent) {
+      parent = current->parent.lock();
+      if (current->is_left_child()) {
+        if (parent->balance == LEFT_HEAVY) {
+          if (current->balance == RIGHT_HEAVY) {
+            left_right(parent);
+          } else {
+            rightRotation(parent);
+            return;
+          }
+        } else {
+          parent->balance += LEFT_HEAVY;
+          if (parent->balance == BALANCED) {
+            return;
+          } else
+            continue;
+        }
+      } else {
+        if (parent->balance == RIGHT_HEAVY) {
+          if (current->balance == LEFT_HEAVY) {
+            right_left(parent);
+            return;
+          } else {
+            leftRotation(parent);
+            return;
+          }
+        } else {
+          parent->balance += RIGHT_HEAVY;
+          if (parent->balance == BALANCED) {
+            return;
+          } else
+            continue;
+        }
+      }
+    }
+  }
+
+  shared_ptr<node> left_right(shared_ptr<node> old_root) {
+    leftRotation(old_root->left);
+    return rightRotation(old_root);
+  }
+
+  shared_ptr<node> right_left(shared_ptr<node> old_root) {
+    rightRotation(old_root);
+    return leftRotation(old_root);
+  }
+
+  void inorderUtil(shared_ptr<node> head);
+
+  shared_ptr<node> insertUtil(shared_ptr<node> head, int x) {
+    if (head == nullptr) {
+      head = make_shared<node>(x);
+      return head;
+    }
+
+    if ( x < head->key){
+      head->left = make_shared<node>(x, head->left);
+      head->left = insertUtil(head->left, x);
+     // retrace_insertion(head->left);
+    }else if(x > head->key) {
+      head->right = make_shared<node>(x, head->right);
+      head->right = insertUtil(head->right, x);
+     // retrace_insertion(head->right);
+    }
+    head->height = 1 + std::max(AVL::height(head->left), AVL::height(head->right));
+    head->balance = AVL::height(head->left) - AVL::height(head->right);
+    if (head->balance > 1) {
+      if (x < head->left->key){
+        return AVL::rightRotation(head);
+      } else {
+        head->left = leftRotation(head->left);
+        return rightRotation(head);
+      }
+  } else if (head->balance < -1) {
+      if (x > head->right->key){
+        return leftRotation(head);
+      } else {
+        head->right = rightRotation(head->right);
+        return leftRotation(head);
+      }
+    }
+    return head;
+  }
+
+};

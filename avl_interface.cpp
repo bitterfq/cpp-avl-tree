@@ -14,9 +14,9 @@ int main(int argc, char **argv) {
   tree.Insert(48);
   tree.Insert(89);
   std::cout << tree.size() << std::endl;
-  tree.Delete(12);
+ // tree.Delete(12);
   std::cout << tree.size();
-  tree.DeleteMin();
+//  tree.DeleteMin();
   std::cout << tree.size() << std::endl;
 
   for (int i = 0; i < 10; i++)
