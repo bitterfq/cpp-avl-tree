@@ -12,8 +12,7 @@ void AVL::Insert(long int key) {
   if (!insertnode) { // if empty new node, root
     root_ = make_shared<AVLnode>(key);
     root_->height = std::max(height(root_->left_), height(root_->right_)) + 1;
-  }
-  else if (insertnode->key_ == key)
+  } else if (insertnode->key_ == key)
     return;
   else if (insertnode->key_ > key) // else new node is left child
   {
@@ -126,6 +125,7 @@ void AVL::retrace_insertion(shared_ptr<AVLnode> node) {
       if (parent->balance_factor == LEFT_HEAVY) {
         if (current->balance_factor == RIGHT_HEAVY) {
           left_right(parent);
+          return;
         } else {
           right_rotate(parent);
           return;
@@ -280,7 +280,7 @@ shared_ptr<AVLnode> AVL::left_right(shared_ptr<AVLnode> old_root) {
 }
 
 shared_ptr<AVLnode> AVL::right_left(shared_ptr<AVLnode> old_root) {
-  right_rotate(old_root);
+  right_rotate(old_root->right_);
   return left_rotate(old_root);
 }
 size_t AVL::size() const {
@@ -331,44 +331,40 @@ void AVL::DeleteMin() {
 
 //https://www.geeksforgeeks.org/avl-tree-set-2-deletion/
 long int AVL::DeleteMin(shared_ptr<AVLnode> currentNode) {
-  if ((root_->left_  )|| (root_->right_)) {
-      shared_ptr<AVLnode> temp = root_->left_ ? root_->left_: root_->right_;
+  if ((root_->left_) || (root_->right_)) {
+    shared_ptr<AVLnode> temp = root_->left_ ? root_->left_ : root_->right_;
 
-      if (temp == nullptr) {
-        temp = root_;
-        root_ = nullptr;
-      }
-      else
-        root_ = temp ;
-        temp.reset();
+    if (temp == nullptr) {
+      temp = root_;
+      root_ = nullptr;
+    } else
+      root_ = temp;
+    temp.reset();
   } // else two children -- in-order succesion
   else {
     shared_ptr<AVLnode> successor = currentNode->right_;
-    shared_ptr<AVLnode> successor_parent ;
+    shared_ptr<AVLnode> successor_parent;
     while (successor->left_)
       successor = successor->left_;
     successor_parent = successor->parent_.lock();
 
-    if (successor->right_)
-    {
+    if (successor->right_) {
       if (successor->is_left_child())
         AVLnode::set_left_child(successor_parent, successor->right_);
       else
         AVLnode::set_right_child(successor_parent, successor->right_);
-    }
-    else
-    {
-      if(successor->is_left_child())
+    } else {
+      if (successor->is_left_child())
         successor_parent->left_ = nullptr;
       else
         successor_parent->right_ = nullptr;
     }
   }
-  size_ -- ;
+  size_--;
 
 }
 void AVL::update(shared_ptr<AVLnode> node) {
-  shared_ptr<AVLnode> temp= node_search(node->key_);
+  shared_ptr<AVLnode> temp = node_search(node->key_);
 }
 int AVL::height(shared_ptr<AVLnode> n) {
   if (n == nullptr)
