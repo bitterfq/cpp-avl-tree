@@ -365,6 +365,7 @@ long int AVL::DeleteMin(shared_ptr<AVLnode> currentNode) {
 }
 void AVL::update(shared_ptr<AVLnode> node) {
   shared_ptr<AVLnode> temp = node_search(node->key_);
+ // node->balance_factor = height(node->right_) - height(node->left_);
 }
 int AVL::height(shared_ptr<AVLnode> n) {
   if (n == nullptr)
