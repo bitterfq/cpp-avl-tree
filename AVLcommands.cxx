@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   json obj;
   fileIn >> obj;
   int opr = obj["metadata"]["numOps"];
-  int i = 0;
+  //int i = 0;
 
   AVL tree;
   for (int x = 1; x <= opr; x++) {
@@ -44,11 +44,11 @@ int main(int argc, char **argv) {
       int keytobeinserted = *itr;
       ++itr;
       string operation = *itr;
-      cout << operation << ", " << keytobeinserted << endl;
+      // cout << operation << ", " << keytobeinserted << endl;
       if (operation == "Insert") {
         tree.Insert(keytobeinserted);
       }
     }
   }
-  cin.get();
+  cout << tree.JSON();
 }

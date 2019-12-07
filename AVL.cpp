@@ -18,11 +18,13 @@ void AVL::Insert(long int key) {
   {
     insertnode->left_ = make_shared<AVLnode>(key, insertnode);
     retrace_insertion(insertnode->left_);
-    update(insertnode->left_);
+    auto nodetobeupdated = node_search(key);
+    update(nodetobeupdated);
   } else {
     insertnode->right_ = make_shared<AVLnode>(key, insertnode);
     retrace_insertion(insertnode->right_);
-    update(insertnode->right_);
+    auto nodetobeupdated = node_search(key);
+    update(nodetobeupdated);
   }
 
   size_++;
@@ -235,7 +237,7 @@ shared_ptr<AVLnode> AVL::left_rotate(shared_ptr<AVLnode> old_root) {
     new_subtreeroot->parent_.reset();
   }
   AVLnode::set_left_child(new_subtreeroot, old_root);
-  AVLnode::set_right_child(new_subtreeroot, old_root);
+  AVLnode::set_right_child(old_root, orphan);
 
   if (old_root->balance_factor == BALANCED) {
     new_subtreeroot->balance_factor = RIGHT_HEAVY;

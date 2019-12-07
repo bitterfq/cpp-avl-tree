@@ -95,7 +95,7 @@ class AVLnode {
   }
 
  private:
-  long int key_;
+  int key_;
   std::weak_ptr<AVLnode> parent_;
   std::shared_ptr<AVLnode> left_;
   std::shared_ptr<AVLnode> right_;
