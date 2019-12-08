@@ -1,3 +1,7 @@
+//
+// created by aman842 on 11/26/19.
+//
+
 #include <cassert>
 #include <iostream>
 #include <string>
@@ -11,20 +15,23 @@ void AVL::Insert(long int key) {
 
   if (!insertnode) { // if empty new node, root
     root_ = make_shared<AVLnode>(key);
-    root_->height = std::max(height(root_->left_), height(root_->right_)) + 1;
+    update(root_);
+    // root_->height = std::max(height(root_->left_), height(root_->right_)) + 1;
   } else if (insertnode->key_ == key)
     return;
   else if (insertnode->key_ > key) // else new node is left child
   {
     insertnode->left_ = make_shared<AVLnode>(key, insertnode);
+    update(insertnode);
     retrace_insertion(insertnode->left_);
     auto nodetobeupdated = node_search(key);
-    update(nodetobeupdated);
+    //   update(nodetobeupdated);
   } else {
     insertnode->right_ = make_shared<AVLnode>(key, insertnode);
+    update(insertnode);
     retrace_insertion(insertnode->right_);
     auto nodetobeupdated = node_search(key);
-    update(nodetobeupdated);
+    // update(nodetobeupdated);
   }
 
   size_++;
@@ -37,6 +44,40 @@ optional AVL::Find(long int key) const {
   return optional();
 }
 
+bool AVL::check_height(long int key) {
+    shared_ptr<AVLnode> target = node_search(key);
+
+    if (!(target && (key == target->key_)))
+        return false;
+
+    if (!(target->is_left_child() && target->is_right_child())) {
+        if(target->height == 0)
+            return true;
+    }
+    else if(target->is_left_child()&&target->is_right_child()) {
+        if(target->height == (1 + std::min(target->left_->height, target->right_->height)))
+        return true;
+    }
+    else if((target->is_left_child() && !(target->is_right_child())) || (target->is_right_child() && !(target->is_left_child())))
+        if(target->height == 1 + target->left_->height)
+            return true;
+        else if(target->height == 1 + target->right_->height)
+            return true;
+
+}
+
+bool AVL::check_balance(long int key) {
+    shared_ptr<AVLnode> target = node_search(key);
+
+    if (!(target && (key == target->key_)))
+        return false;
+
+    return !(target->left_->balance_factor != 0 &&
+             target->left_->balance_factor != -1 &&
+             target->left_->balance_factor != 1);
+
+}
+// Delete and DeleteMin are not required, but the best version of them is implemented below
 void AVL::Delete(long int key) {
   shared_ptr<AVLnode> target = node_search(key);
 
@@ -95,24 +136,24 @@ shared_ptr<AVLnode> AVL::node_search(long int key) const {
   if (!root_)
     return nullptr;
   shared_ptr<AVLnode> current = root_;
-  int height = 1;
+  // int height = 0;
   for (;;) {
     if (key < current->key_)
       if (current->left_) {
         current = current->left_;
-        height++;
+        //height++;
       } else
         return current;
 
     else if (key > current->key_)
       if (current->right_) {
         current = current->right_;
-        height++;
+        //  height++;
       } else
         return current;
 
     else {
-      current->height = height;
+      //  current->height = height;
       return current;
     }
   }
@@ -246,6 +287,10 @@ shared_ptr<AVLnode> AVL::left_rotate(shared_ptr<AVLnode> old_root) {
     new_subtreeroot->balance_factor = BALANCED;
     old_root->balance_factor = BALANCED;
   }
+  update(new_subtreeroot);
+  update(old_root);
+  //new_subtreeroot->height = maxDepth(new_subtreeroot);
+  // old_root->height = maxDepth(old_root);
   return new_subtreeroot;
 }
 
@@ -272,6 +317,10 @@ shared_ptr<AVLnode> AVL::right_rotate(shared_ptr<AVLnode> old_root) {
     new_subtree_root->balance_factor = BALANCED;
     old_root->balance_factor = BALANCED;
   }
+  update(new_subtree_root);
+  update(old_root);
+  // new_subtree_root->height = maxDepth(new_subtree_root);
+  // old_root->height = maxDepth(old_root);
   return new_subtree_root;
 
 }
@@ -315,8 +364,11 @@ std::string AVL::JSON() const {
       } else {
         result[key]["root"] = true;
       }
+      result[key]["height"] = v->height;
+      result[key]["balance factor"] = -(v->balance_factor);
     }
   }
+  result["height"] = root_->height;
   result["size"] = size_;
   return result.dump(2) + "\n";
 }
@@ -325,8 +377,9 @@ AVL::AVL() {
   size_ = 0;
 }
 
-void AVL::DeleteMin() {
-  DeleteMin(root_);
+long int AVL::DeleteMin() {
+    auto x = DeleteMin(root_);
+  return x;
 }
 
 //Geeks for geeks deleteion method specified
@@ -342,6 +395,8 @@ long int AVL::DeleteMin(shared_ptr<AVLnode> currentNode) {
     } else
       root_ = temp;
     temp.reset();
+
+    return temp->key_;
   } // else two children -- in-order succesion
   else {
     shared_ptr<AVLnode> successor = currentNode->right_;
@@ -361,13 +416,43 @@ long int AVL::DeleteMin(shared_ptr<AVLnode> currentNode) {
       else
         successor_parent->right_ = nullptr;
     }
+    return successor->key_;
   }
   size_--;
-
 }
 void AVL::update(shared_ptr<AVLnode> node) {
+  int lh, rh;
+  if (node->left_ != nullptr) {
+    rh = node->left_->height;
+  } else
+    rh = -1;
+
+  if (node->right_ != nullptr) {
+    lh = node->right_->height;
+  } else
+    lh = -1;
+
+  node->height = 1 + std::max(lh, rh);
   shared_ptr<AVLnode> temp = node_search(node->key_);
- // node->balance_factor = height(node->right_) - height(node->left_);
+  // node->balance_factor = height(node->right_) - height(node->left_);
+}
+
+int AVL::maxDepth(shared_ptr<AVLnode> node) {
+  shared_ptr<AVLnode> temp = root_;
+
+  if (node == nullptr)
+    return 0;
+  else {
+    /* compute the depth of each subtree */
+    int lDepth = maxDepth(node->left_);
+    int rDepth = maxDepth(node->right_);
+
+    /* use the larger one */
+    if (lDepth > rDepth)
+      return (lDepth + 1);
+    else return (rDepth + 1);
+  }
+
 }
 int AVL::height(shared_ptr<AVLnode> n) {
   if (n == nullptr)
@@ -376,5 +461,19 @@ int AVL::height(shared_ptr<AVLnode> n) {
     n->height = std::max(height(n->left_), height(n->right_)) + 1;
 
   return n->height;
+}
+int AVL::flipheight() {
+  return root_->height = maxDepth(root_) - 1;
+}
+void AVL::traverse(shared_ptr<AVLnode> root) {
+  int maxdepth = maxDepth(root_);
+  if (root->left_ != nullptr)
+    traverse(root->left_);
+
+  if (root->right_ != nullptr)
+    traverse(root->right_);
+
+  root->height = maxdepth - root->height;
+
 }
 

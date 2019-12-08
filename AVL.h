@@ -1,3 +1,7 @@
+//
+// created by aman842 on 11/26/19.
+//
+
 #include <memory>
 #include <string>
 
@@ -62,6 +66,7 @@ class AVLnode {
     return false;
   }
 
+  //strangley never found a use for this.
   shared_ptr<AVLnode> sibiling() const {
     if (is_left_child())
       return parent_.lock()->left_;
@@ -69,6 +74,7 @@ class AVLnode {
       return parent_.lock()->right_;
   }
 
+  // function to correct balance if needed.
   void correct_balance() {
     if (left_ && right_) {
       if (abs(left_->balance_factor) == abs(right_->balance_factor))
@@ -107,7 +113,7 @@ class AVLnode {
 
 class AVL {
  public:
-  AVL();
+  AVL(); // default constructor
 
   void Insert(long int key);
   void Delete(long int key);
@@ -116,19 +122,33 @@ class AVL {
   size_t size() const;
   bool empty() const;
   void DeleteMin();
+  int flipheight(); //i love my naming convention, basically a function to get maxdepth in a tree.
 
  private:
-  void update (shared_ptr<AVLnode> node);
-  long int DeleteMin(shared_ptr<AVLnode> currentNode);
-  shared_ptr<AVLnode> node_search(long int key) const;
-  void retrace_insertion(shared_ptr<AVLnode> node);
-  void retrace_deletion(shared_ptr<AVLnode> subtree_root, int8_t balance_factor);
+  void update(shared_ptr<AVLnode> node); //update the node's height
+  long int DeleteMin(shared_ptr<AVLnode> currentNode); // i spent two days on this and delete thinking it would be required :( !
+  shared_ptr<AVLnode> node_search(long int key) const; // function that iterates through tree to look for node->key
+  void retrace_insertion(shared_ptr<AVLnode> node); // function to retrace insertion and balance out the avl tree
+  void retrace_deletion(shared_ptr<AVLnode> subtree_root,
+                        int8_t balance_factor); // function to retrace deletion which sadly..... is not used :(
 
+  // Rotate functions !
   shared_ptr<AVLnode> left_rotate(shared_ptr<AVLnode> old_root);
   shared_ptr<AVLnode> right_rotate(shared_ptr<AVLnode> old_root);
   shared_ptr<AVLnode> left_right(shared_ptr<AVLnode> old_root);
   shared_ptr<AVLnode> right_left(shared_ptr<AVLnode> old_root);
+
+  //Data functions
   std::shared_ptr<AVLnode> root_;
   size_t size_;
+
+  //Height functions !
   int height(shared_ptr<AVLnode> n);
+  int maxDepth(shared_ptr<AVLnode> node);
+  void traverse(shared_ptr<AVLnode> root);
+
+  //Testing functions
+  bool check_balance(long int key);
+  bool check_height(long int key);
+
 }; // class AVL
